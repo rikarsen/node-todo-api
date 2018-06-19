@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const { ObjectID } = require('mongodb');
 
 const { mongoose } = require('./db/mongoose');
 const { Todo } = require('./models/todo');
@@ -25,32 +26,24 @@ app.get('/todos', (req, res) => {
   }, (err) => res.status(400).send(err));
 });
 
+app.get('/todos/:id', (req, res) => {
+  const id = req.params.id;
+
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  }
+
+  Todo.findById(id).then(todo => {
+    if (!todo) {
+      return res.status(404).send();
+    }
+
+    res.send({ todo });
+  }, err => res.status(400).send(err))
+});
+
 app.listen(3000, () => {
   console.log('Started on port 3000');
 });
 
 module.exports = { app };
-
-// let todo = new Todo({
-//   text: 'something    d'
-// });
-//
-// todo
-//   .save()
-//   .then((doc) => {
-//     console.log('Saved todo', doc);
-//   }, (err) => {
-//     console.log('Unable to save todo', err);
-//   });
-//
-// let user = new User({
-//   email: 'arsenbabajanyan95@gmail.com'
-// });
-//
-// user
-//   .save()
-//   .then((doc) => {
-//     console.log('User saved', doc);
-//   }, (err) => {
-//     console.log('Unable to save user', err);
-//   });
